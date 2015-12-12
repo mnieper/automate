@@ -4,6 +4,7 @@
 	  (automate monomial))
   (export make-term term? term-coefficient term-monomial
 	  make-polynomial polynomial?
+	  zero-polynomial
 	  polynomial-zero? leading-term polynomial-remainder
 	  polynomial-sum
 	  polynomial-product

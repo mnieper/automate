@@ -61,11 +61,11 @@
 	    (cond
 	     ((> d1 d2)
 	      (vector-set! r2 i (- d1 d2))
-	      (loop (+ i 1) (+ d (- d1 d2))))
+	      (loop (+ i 1) (+ d d1)))
 	     ((< d1 d2)
 	      (vector-set! r1 i (- d2 d1))
-	      (loop (+ i 1) (+ d (- d2 d1))))
-	     (else (loop (+ i 1) d))))))))
+	      (loop (+ i 1) (+ d d2)))
+	     (else (loop (+ i 1) (+ d d1)))))))))
 
 (define grevlex-ordering
   (make-ordering grevlex-monomial

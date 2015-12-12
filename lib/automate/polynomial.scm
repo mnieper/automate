@@ -177,8 +177,8 @@
   (let*-values
       (((lt1) (leading-term p1)) ((lt2) (leading-term p2))
        ((m1 m2) (monomial-syzygy ordering (term-monomial lt1) (term-monomial lt2)))
-       ((c1) (term-coefficient lt1))
-       ((c2) (term-coefficient lt2)))
+       ((c1) (coefficient-inverse field (term-coefficient lt1)))
+       ((c2) (coefficient-inverse field (term-coefficient lt2))))
     (polynomial-weighted-difference field ordering c1 m1 p1 c2 m2 p2)))
 
 (define (reduced-syzygy-polynomial field ordering ideal p1 p2)
