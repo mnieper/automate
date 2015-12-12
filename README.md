@@ -13,7 +13,6 @@ This package is written in portable R7RS Scheme. Its Makefile, however, assumes 
     chibi-scheme -Ilib -R -mautomate
     > (import (automate rational-field))
     > (import (automate grevlex-ordering))
-    > (define-algebra a (
     > (define-algebra a (rational-field grevlex-ordering (x y z)
                                         ((+ (4 z) (-4 x y 2) (-16 x 2) -1)
                                          (+ (2 y 2 z) (4 x) 1)
