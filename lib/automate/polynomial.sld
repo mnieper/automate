@@ -2,7 +2,8 @@
   (import (scheme base)
 	  (automate coefficient)
 	  (automate monomial))
-  (export make-term term? term-coefficient term-monomial
+  (export make-algebra field ordering
+	  make-term term? term-coefficient term-monomial
 	  make-polynomial polynomial?
 	  zero-polynomial
 	  polynomial-zero? leading-term polynomial-remainder

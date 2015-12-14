@@ -22,31 +22,29 @@
 
 (define-syntax define-algebra
   (syntax-rules ()
-    ((define-algebra algebra (fld order (x ...) (f ...)))
+    ((define-algebra A (fld order (x ...) (f ...)))
      (begin
-       (define field fld)
+       (define field fld)      ; don't need this
        (define ordering order)
+       (define algebra (make-algebra field ordering 0))
        (define indeterminates #(x ...))
        (define ideal
-	 (groebner-basis field
-			 ordering
-			 ((eval `(lambda (field ordering)
+	 (groebner-basis algebra
+			 ((eval `(lambda (algebra)
 				   ,(compile-ideal indeterminates `(f ...)))
 				algebra-environment)
-		      field ordering)))
-       (define-syntax algebra
+		      algebra)))
+       (define-syntax A
 	 (syntax-rules ()
-	   ((algebra code)
-	    (externalize-polynomial field
-				    ordering
+	   ((A code)
+	    (externalize-polynomial algebra
 				    indeterminates
-				    (reduce field
-					    ordering
+				    (reduce algebra
 					    ideal
-					    ((eval `(lambda (field ordering)
+					    ((eval `(lambda (algebra)
 						      ,(compile indeterminates `code))
 						   algebra-environment)
-					     field ordering))))))))))
+					     algebra))))))))))
 
 (define (compile-ideal indeterminates polynomials)
   `(list ,@(map (lambda (polynomial)
@@ -56,10 +54,9 @@
 (define (compile indeterminates code)
   (cond
    ((exact-rational? code)
-    `(make-polynomial field
-		      ordering
-		      (list (make-term (make-coefficient field ,code)
-				       (make-monomial ordering
+    `(make-polynomial algebra
+		      (list (make-term (make-coefficient (field algebra) ,code)
+				       (make-monomial (ordering algebra)
 						      ,(make-vector (vector-length indeterminates)
 								    0))))))
    ((pair? code)
@@ -79,20 +76,20 @@
 (define (compile-sum summands)
   (cond
    ((null? summands)
-    `(make-polynomial field ordering (list)))
+    `(make-polynomial algebra (list)))
    ((null? (cdr summands))
     (car summands))
    (else
-    `(polynomial-sum field ordering ,(car summands) ,(compile-sum (cdr summands))))))
+    `(polynomial-sum algebra ,(car summands) ,(compile-sum (cdr summands))))))
 
 (define (compile-product summands)
   (cond
    ((null? summands)
-    `(make-polynomial field ordering (list)))
+    `(make-polynomial algebra (list)))
    ((null? (cdr summands))
     (car summands))
    (else
-    `(polynomial-product field ordering ,(car summands) ,(compile-product (cdr summands))))))
+    `(polynomial-product algebra ,(car summands) ,(compile-product (cdr summands))))))
 
 (define (degree number)
   (or (>= number 0)
@@ -107,8 +104,8 @@
        ((exponent) (make-vector n 0)))    
     (let loop1 ((code code))
       (if (null? code)
-	  `(make-polynomial field ordering (list (make-term (make-coefficient field ,number)
-							    (make-monomial ordering ,exponent))))
+	  `(make-polynomial algebra (list (make-term (make-coefficient (field algebra) ,number)
+						     (make-monomial (ordering algebra) ,exponent))))
 	  (let ((indeterminate (car code)))
 	    (let loop2 ((i 0))
 	      (cond
