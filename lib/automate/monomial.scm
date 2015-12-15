@@ -21,8 +21,8 @@
 (define (monomial-exponent ordering monomial)
   ((%monomial-exponent ordering) monomial))
 
-(define (monomial-product ordering monomial1 monomial2)
-  ((%monomial-product ordering) monomial1 monomial2))
+(define (monomial-product ordering dim monomial1 monomial2)
+  ((%monomial-product ordering) dim monomial1 monomial2))
 
 (define (monomial-quotient ordering monomial1 monomial2)
   ((%monomial-quotient ordering) monomial1 monomial2))

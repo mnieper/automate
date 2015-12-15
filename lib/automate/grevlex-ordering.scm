@@ -24,7 +24,7 @@
 			    (and (= n1 n2)
 				 (loop i)))))))))))
 
-(define (grevlex-product monomial1 monomial2)
+(define (grevlex-product dim monomial1 monomial2)
   (let* ((e1 (grevlex-exponent monomial1)) (e2 (grevlex-exponent monomial2))
 	 (n (vector-length e1))
 	 (e (make-vector n)))

@@ -32,12 +32,14 @@
 	   (make-term coefficient (term-monomial term1))))))
 
 (define (term-product algebra term1 term2)
-  (let ((field (field algebra))
-	(ordering (ordering algebra)))
+  (let
+      ((field (field algebra))
+       (ordering (ordering algebra))
+       (odds (odds algebra)))
     (make-term (coefficient-product field
 				    (term-coefficient term1)
 				    (term-coefficient term2))
-	       (monomial-product ordering
+	       (monomial-product ordering odds
 				 (term-monomial term1)
 				 (term-monomial term2)))))
 
