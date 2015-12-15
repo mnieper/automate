@@ -20,12 +20,14 @@
 					 '(automate monomial)
 					 '(automate polynomial)))
 
+(define d 'd)
+
 (define-syntax define-algebra
   (syntax-rules ()
     ((define-algebra A (field ordering (x ...) (f ...)))
      (begin
-       (define algebra (make-algebra field ordering 0))
-       (define indeterminates #(x ...))
+       (define indeterminates `#(x ... (,d x) ...))
+       (define algebra (make-algebra field ordering (* 1/2 (vector-length indeterminates))))
        (define ideal
 	 (groebner-basis algebra
 			 ((eval `(lambda (algebra)
@@ -59,6 +61,7 @@
 								    0))))))
    ((pair? code)
     (case (car code)
+      ((d) (compile-monomial indeterminates (list code)))
       ((+) (compile-sum (compile* indeterminates (cdr code))))
       ((*) (compile-product (compile* indeterminates (cdr code))))
       (else (compile-monomial indeterminates code))))
@@ -98,23 +101,26 @@
       (((number code) (if (exact-rational? (car code))
 			  (values (car code) (cdr code))
 			  (values 1 code)))
-       ((n) (vector-length indeterminates))
-       ((exponent) (make-vector n 0)))    
-    (let loop1 ((code code))
+       ((exponent) (make-vector (vector-length indeterminates) 0)))
+    (let loop ((code code))
       (if (null? code)
 	  `(make-polynomial algebra (list (make-term (make-coefficient (field algebra) ,number)
 						     (make-monomial (ordering algebra) ,exponent))))
-	  (let ((indeterminate (car code)))
-	    (let loop2 ((i 0))
-	      (cond
-	       ((= i n) (error "unknown indeterminate" indeterminate))
-	       ((eq? indeterminate (vector-ref indeterminates i))
-		(let-values
-		    (((degree code) (if (and (not (null? (cdr code)))
-					     (exact-integer? (cadr code))
-					     (degree (cadr code)))
-					(values (cadr code) (cddr code))
-					(values 1 (cdr code)))))
-		  (vector-set! exponent i (+ (vector-ref exponent i) degree))
-		  (loop1 code)))
-	       (else (loop2 (+ i 1))))))))))
+	  (let ((i (find-indeterminate indeterminates (car code))))
+	    (unless i (error "unknown indeterminate" (car code)))
+	    (let-values
+		(((degree code) (if (and (not (null? (cdr code)))
+					 (exact-integer? (cadr code))
+					 (degree (cadr code)))
+				    (values (cadr code) (cddr code))
+				    (values 1 (cdr code)))))
+	      (vector-set! exponent i (+ (vector-ref exponent i) degree))
+	      (loop code)))))))
+
+(define (find-indeterminate indeterminates code)
+  (let ((n (vector-length indeterminates)))
+    (let loop ((i 0))
+      (and (< i n)
+	   (if (equal? code (vector-ref indeterminates i))
+	       i
+	       (loop (+ i 1)))))))
