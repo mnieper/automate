@@ -22,10 +22,8 @@
 
 (define-syntax define-algebra
   (syntax-rules ()
-    ((define-algebra A (fld order (x ...) (f ...)))
+    ((define-algebra A (field ordering (x ...) (f ...)))
      (begin
-       (define field fld)      ; don't need this
-       (define ordering order)
        (define algebra (make-algebra field ordering 0))
        (define indeterminates #(x ...))
        (define ideal
