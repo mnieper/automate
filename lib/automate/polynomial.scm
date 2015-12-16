@@ -32,34 +32,57 @@
 	   (make-term coefficient (term-monomial term1))))))
 
 (define (term-product algebra term1 term2)
-  (let
-      ((field (field algebra))
-       (ordering (ordering algebra))
-       (odds (odds algebra)))
-    (make-term (coefficient-product field
-				    (term-coefficient term1)
-				    (term-coefficient term2))
-	       (monomial-product ordering odds
-				 (term-monomial term1)
-				 (term-monomial term2)))))
+  (let*-values
+      (((field) (field algebra))
+       ((ordering) (ordering algebra))
+       ((odds) (odds algebra))
+       ((sign monomial) (monomial-product ordering
+					  odds
+					  (term-monomial term1)
+					  (term-monomial term2))))
+    (if (eq? 0 sign)
+	(make-term 0 #f)
+	(let ((coefficient (coefficient-product field
+						(term-coefficient term1)
+						(term-coefficient term2))))
+	  (if (eq? 1 sign)
+	      (make-term coefficient monomial)
+	      (make-term (coefficient-negative field coefficient) monomial))))))
+
+(define (term-derivative algebra term i)
+  (let*-values
+      (((field) (field algebra))
+       ((ordering) (ordering algebra))
+       ((dim) (odds algebra))
+       ((coefficient) (term-coefficient term))
+       ((exponent) (monomial-exponent ordering (term-monomial term)))
+       ((d) (vector-ref exponent i))
+       ((e) (vector-copy exponent)))
+    (vector-set! e i (- d 1))
+    (make-term (coefficient-product field coefficient (make-coefficient field d))
+	       (make-monomial ordering e))))
 
 (define (runs algebra terms)
-  (let loop ((terms terms))
-    (if (null? terms)
-	'()
-	(let ((term1 (car terms)) (runs (loop (cdr terms))))
-	  (if (null? runs)
-	      (list (list term1))
-	      (let* ((run (car runs)) (term2 (car run)))
-		(case (term-compare algebra term1 term2)
-		  ((1) (cons (cons term1 run) (cdr runs)))
-		  ((-1) (cons (list term1) runs))
-		  (else
-		   (let ((term (term-merge algebra term1 term2)))
-		     (cond
-		      (term (cons (cons term (cdr run)) (cdr runs)))
-		      ((null? (cdr run)) (cdr runs))
-		      (else (cons (cdr run) (cdr runs)))))))))))))
+  (let ((field (field algebra)))
+    (let loop ((terms terms))
+      (if (null? terms)
+	  '()
+	  (let ((term1 (car terms)))
+	    (if (coefficient-zero? field (term-coefficient term1))
+		(loop (cdr terms))
+		(let ((runs (loop (cdr terms))))
+		  (if (null? runs)
+		      (list (list term1))
+		      (let* ((run (car runs)) (term2 (car run)))
+			(case (term-compare algebra term1 term2)
+			  ((1) (cons (cons term1 run) (cdr runs)))
+			  ((-1) (cons (list term1) runs))
+			  (else
+			   (let ((term (term-merge algebra term1 term2)))
+			     (cond
+			      (term (cons (cons term (cdr run)) (cdr runs)))
+			      ((null? (cdr run)) (cdr runs))
+			      (else (cons (cdr run) (cdr runs))))))))))))))))
 
 (define (terms-merge algebra run1 run2)
   (let loop ((run1 run1) (run2 run2))
@@ -133,6 +156,12 @@
 				 (loop1 (cdr terms1) terms2)
 				 (cons (term-product algebra term (car terms))
 				       (loop2 (cdr terms))))))))))
+
+(define (polynomial-derivative algebra polynomial i)
+  (make-polynomial algebra
+		   (map (lambda (term)
+			  (term-derivative algebra term i))
+			(terms polynomial))))
 
 (define (externalize-term algebra indeterminates term)
   (let* ((field (field algebra))

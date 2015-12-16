@@ -7,7 +7,7 @@
 
 (test-begin "polynomial")
 
-(define alg (make-algebra rational-field grevlex-ordering 0))
+(define alg (make-algebra rational-field grevlex-ordering 3))
 
 (define (show p)
   (externalize-polynomial alg

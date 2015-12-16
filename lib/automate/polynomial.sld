@@ -9,6 +9,7 @@
 	  polynomial-zero? leading-term polynomial-remainder
 	  polynomial-sum
 	  polynomial-product
+	  polynomial-derivative
 	  externalize-polynomial
 	  reduce
 	  groebner-basis)

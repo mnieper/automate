@@ -46,7 +46,7 @@
 						   algebra-environment)
 					     algebra))))))))))
 
-(define (compile-ideal indeterminates polynomials)
+(define (compile-ideal indeterminates polynomials) ; TODO: Add d (...) of ideal members
   `(list ,@(map (lambda (polynomial)
 		  (compile indeterminates polynomial))
 		polynomials)))
@@ -61,7 +61,7 @@
 								    0))))))
    ((pair? code)
     (case (car code)
-      ((d) (compile-monomial indeterminates (list code)))
+      ((d) (compile-derivative indeterminates (cdr code)))
       ((+) (compile-sum (compile* indeterminates (cdr code))))
       ((*) (compile-product (compile* indeterminates (cdr code))))
       (else (compile-monomial indeterminates code))))
@@ -73,6 +73,26 @@
   (map (lambda (code)
 	 (compile indeterminates code))
        code*))
+
+(define (compile-derivative indeterminates code)
+  (let ((n (* 1/2 (vector-length indeterminates))))
+    `(let ((polynomial ,(compile indeterminates (car code))))
+       (let loop ((i 0) (derivative zero-polynomial))
+	 (if (= i ,n)
+	     derivative
+	     (let ((e (make-vector ,(* 2 n) 0)))
+	       (vector-set! e (+ i ,n) 1)
+	       (loop (+ i 1)
+		     (polynomial-sum algebra
+				     derivative
+				     (polynomial-product
+				      algebra
+				      (make-polynomial
+				       algebra
+				       (list
+					(make-term (make-coefficient (field algebra) 1)
+						   (make-monomial (ordering algebra) e))))
+				      (polynomial-derivative algebra polynomial i))))))))))
 
 (define (compile-sum summands)
   (cond
@@ -118,9 +138,9 @@
 	      (loop code)))))))
 
 (define (find-indeterminate indeterminates code)
-  (let ((n (vector-length indeterminates)))
+  (let ((n (* 1/2 (vector-length indeterminates))))
     (let loop ((i 0))
       (and (< i n)
-	   (if (equal? code (vector-ref indeterminates i))
+	   (if (eq? code (vector-ref indeterminates i))
 	       i
 	       (loop (+ i 1)))))))

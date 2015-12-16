@@ -30,6 +30,9 @@
 (define (monomial-syzygy ordering monomial1 monomial2)
   ((%monomial-syzygy ordering) monomial1 monomial2))
 
+(define (externalize-indeterminate indeterminates i)
+  (list-copy (vector-ref indeterminates i)))
+
 (define (externalize-monomial ordering indeterminates monomial)
   (let ((exponent (monomial-exponent ordering monomial)))
     (do	((i (- (vector-length exponent) 1) (- i 1))
@@ -37,8 +40,8 @@
 	    (let ((e (vector-ref exponent i)))
 	      (case e
 		((0) d)
-		((1) (cons (vector-ref indeterminates i) d))
-		(else (cons (vector-ref indeterminates i) (cons e d)))))))
+		((1) (cons (externalize-indeterminate indeterminates i) d))
+		(else (cons (externalize-indeterminate indeterminates i) (cons e d)))))))
 	((= i -1)
 	 (cond
 	  ((null? d) 1)
