@@ -1,0 +1,5 @@
+(define-library (automate differential-form)
+  (import (scheme base)
+	  (automate polynomial))
+  (export make-differential-algebra externalize-differential-form)
+  (include "differential-form.scm"))

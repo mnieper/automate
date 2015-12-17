@@ -21,6 +21,7 @@
 	  (automate coefficient)
 	  (automate monomial)
 	  (automate polynomial)
+	  (automate differential-form)
 	  (automate rational-field))
   (export define-algebra)
   (include "automate.scm"))

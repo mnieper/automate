@@ -26,8 +26,8 @@
   (syntax-rules ()
     ((define-algebra A (field ordering (x ...) (f ...)))
      (begin
-       (define indeterminates `#(x ... (,d x) ...))
-       (define algebra (make-algebra field ordering (* 1/2 (vector-length indeterminates))))
+       (define indeterminates `#(x ...))
+       (define algebra (make-differential-algebra field ordering (vector-length indeterminates)))
        (define ideal
 	 (groebner-basis algebra
 			 ((eval `(lambda (algebra)
@@ -37,16 +37,17 @@
        (define-syntax A
 	 (syntax-rules ()
 	   ((A code)
-	    (externalize-polynomial algebra
-				    indeterminates
-				    (reduce algebra
-					    ideal
-					    ((eval `(lambda (algebra)
-						      ,(compile indeterminates `code))
-						   algebra-environment)
-					     algebra))))))))))
+	    (externalize-differential-form
+	     algebra
+	     indeterminates
+	     (reduce algebra ; FIXME reduce-differential-form to add d(ideal).
+		     ideal
+		     ((eval `(lambda (algebra)
+			       ,(compile indeterminates `code))
+			    algebra-environment)
+		      algebra))))))))))
 
-(define (compile-ideal indeterminates polynomials) ; TODO: Add d (...) of ideal members
+(define (compile-ideal indeterminates polynomials)
   `(list ,@(map (lambda (polynomial)
 		  (compile indeterminates polynomial))
 		polynomials)))
@@ -75,7 +76,7 @@
        code*))
 
 (define (compile-derivative indeterminates code)
-  (let ((n (* 1/2 (vector-length indeterminates))))
+  (let ((n (vector-length indeterminates)))
     `(let ((polynomial ,(compile indeterminates (car code))))
        (let loop ((i 0) (derivative zero-polynomial))
 	 (if (= i ,n)
@@ -121,7 +122,7 @@
       (((number code) (if (exact-rational? (car code))
 			  (values (car code) (cdr code))
 			  (values 1 code)))
-       ((exponent) (make-vector (vector-length indeterminates) 0)))
+       ((exponent) (make-vector (* 2 (vector-length indeterminates)) 0)))
     (let loop ((code code))
       (if (null? code)
 	  `(make-polynomial algebra (list (make-term (make-coefficient (field algebra) ,number)
@@ -138,7 +139,7 @@
 	      (loop code)))))))
 
 (define (find-indeterminate indeterminates code)
-  (let ((n (* 1/2 (vector-length indeterminates))))
+  (let ((n (vector-length indeterminates)))
     (let loop ((i 0))
       (and (< i n)
 	   (if (eq? code (vector-ref indeterminates i))
