@@ -1,0 +1,4 @@
+- (d x) input output funktioniert nicht... sollen wir (+ d x d y) erlauben?
+- monomial-quotient may yield a sign!
+- neues frontend
+- exterior algebra als eigener wrapper um polynomials
