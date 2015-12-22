@@ -9,6 +9,10 @@
 	  current-state
 	  current-label
 	  set-label!
+	  set-characteristic!
+	  add-global!
+	  add-local!
+	  variable
 	  state-pop!
 	  automate-eval)
   (include "eval.scm"))

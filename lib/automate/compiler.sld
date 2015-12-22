@@ -1,4 +1,6 @@
 (define-library (automate compiler)
-  (import (scheme base) (automate error))
+  (import (scheme base)
+	  (automate base)
+	  (automate error))
   (export compile)
   (include "compiler.scm"))
